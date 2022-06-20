@@ -1,44 +1,1 @@
-import os
-
-import zhconv as zhconv
-from mutagen.flac import FLAC
-
-
-def get_meta(x_path):
-    for dirpath, directories, files in os.walk(x_path):
-        for sound_file in files:
-            if sound_file.endswith('.flac') or sound_file.endswith('.FLAC'):
-                print('flac:\t\t%s/%s' % (dirpath, sound_file))
-                flac_file = os.path.join(dirpath, sound_file)
-                metadata = FLAC(flac_file)
-                titles = [zhconv.convert(item, "zh-hans") for item in get_metadata(metadata, "TITLE")]
-                albums = [zhconv.convert(item, "zh-hans") for item in get_metadata(metadata, "ALBUM")]
-                album_artists = [zhconv.convert(item, "zh-hans") for item in get_metadata(metadata, "ALBUMARTIST")]
-                artists = [zhconv.convert(item, "zh-hans") for item in get_metadata(metadata, "ARTIST")]
-
-                metadata["TITLE"] = titles
-                metadata["ALBUM"] = albums
-                metadata["ALBUMARTIST"] = album_artists
-                metadata["ARTIST"] = artists
-                metadata["COMMENT"] = [""]
-                metadata["DESCRIPTION"] = [""]
-
-                metadata.save()
-                print("metadata:\ttitles:%s, albums:%s, album_artists:%s, artists:%s" % (
-                    titles, albums, album_artists, artists))
-
-
-def get_metadata(metadata, key):
-    datas = []
-    if key in metadata:
-        for item in metadata.get(key):
-            datas.append(item)
-    if len(datas) == 0:
-        datas.append("")
-    return datas
-
-
-if __name__ == '__main__':
-    # XPATH = "/Volumes/music/music/歌手专辑/"
-    XPATH = "%s/" % os.path.abspath('..')
-    get_meta(XPATH)
+import operatorimport osimport zhconv as zhconvfrom mutagen.flac import FLACdef get_meta(x_path):    for dirpath, directories, files in os.walk(x_path):        for sound_file in files:            if sound_file.endswith('.flac') or sound_file.endswith('.FLAC'):                print('flac:\t\t%s/%s' % (dirpath, sound_file))                flac_file = os.path.join(dirpath, sound_file)                metadata = FLAC(flac_file)                need_update = False                old_titles = get_metadata(metadata, "TITLE")                titles = [zhconv.convert(item, "zh-hans") for item in old_titles]                if not operator.eq(old_titles, titles):                    need_update = True                old_albums = get_metadata(metadata, "ALBUM")                albums = [zhconv.convert(item, "zh-hans") for item in old_albums]                if not operator.eq(old_albums, albums):                    need_update = True                old_album_artists = get_metadata(metadata, "ALBUMARTIST")                album_artists = [zhconv.convert(item, "zh-hans") for item in old_album_artists]                if not operator.eq(old_album_artists, album_artists):                    need_update = True                old_artists = get_metadata(metadata, "ARTIST")                artists = [zhconv.convert(item, "zh-hans") for item in old_artists]                if not operator.eq(old_artists, artists):                    need_update = True                old_content = get_metadata(metadata, "COMMENT")                if len(old_content) > 0 and old_content[0] != "":                    need_update = True                old_description = get_metadata(metadata, "DESCRIPTION")                if len(old_description) > 0 and old_description[0] != "":                    need_update = True                if need_update:                    metadata["TITLE"] = titles                    metadata["ALBUM"] = albums                    metadata["ALBUMARTIST"] = album_artists                    metadata["ARTIST"] = artists                    metadata["COMMENT"] = []                    metadata["DESCRIPTION"] = []                    metadata.save()                    print("metadata update:\ttitles:%s, albums:%s, album_artists:%s, artists:%s" % (                        titles, albums, album_artists, artists))def get_metadata(metadata, key):    datas = []    if key in metadata:        for item in metadata.get(key):            datas.append(item)    if len(datas) == 0:        datas.append("")    return datasif __name__ == '__main__':    XPATH = "V:\music"    # XPATH = "%s/" % os.path.abspath('..')    get_meta(XPATH)
